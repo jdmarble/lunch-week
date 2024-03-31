@@ -1,0 +1,41 @@
+- name: Install and run a Minecraft server
+  hosts: prodesk.jdmarble.net
+  roles:
+    - role: geerlingguy.pip
+      become: true
+      vars:
+        pip_install_packages:
+          - name: docker
+            version: "7.0.0"
+    - role: geerlingguy.docker
+      become: true
+  tasks:
+    - name: Add user that runs the Minecraft server
+      become: true
+      ansible.builtin.user:
+        name: minecraft
+        state: present
+      register: minecraft_user_registered
+    - name: Create the directory to store Minecraft data
+      become: true
+      become_user: "{{ minecraft_user_registered.name }}"
+      ansible.builtin.file:
+        path: "{{ minecraft_user_registered.home }}/data"
+        owner: "{{ minecraft_user_registered.name }}"
+        group: "{{ minecraft_user_registered.name }}"
+        state: directory
+        mode: 'u=rwx,g=r,o='
+    - name: Create and start the Minecraft server container
+      become: true
+      community.docker.docker_container:
+        state: started
+        name: minecraft
+        image: itzg/minecraft-server:2024.3.0
+        ports:
+          - "25565:25565"
+        env:
+          EULA: "TRUE"
+          UID: "{{ minecraft_user_registered.uid }}"
+          GID: "{{ minecraft_user_registered.group }}"
+        volumes:
+          - /home/user/data:/data

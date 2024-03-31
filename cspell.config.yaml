@@ -1,0 +1,17 @@
+dictionaryDefinitions:
+  - name: repoWords
+    path: dictionary.txt
+    addWords: true
+dictionaries:
+  - repoWords
+
+patterns:
+  - name: markdown_inline_code
+    pattern: "(\\`{1})(.*)(\\`{1})"
+  - name: markdown_code_block
+    pattern: "/(```+)\\s?[\\s\\S]+?\\1/g"
+languageSettings:
+  - languageId: markdown
+    ignoreRegExpList:
+      - markdown_inline_code
+      - markdown_code_block

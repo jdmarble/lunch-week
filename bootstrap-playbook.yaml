@@ -1,0 +1,24 @@
+---
+- name: Configure hosts to allow Ansible to condigure them
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if Python is installed
+      ansible.builtin.raw: python3 --version
+      register: python_check
+      changed_when: false
+    - name: Install python
+      when: python_check.rc != 0
+      become: true
+      ansible.builtin.raw: |
+        apt update && apt install python3 --assume-yes
+      changed_when: true  # Assume `apt update` has side effects.
+    - name: Sudo without password
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/sudo-group-nopasswd
+        content: '%sudo ALL=(ALL) NOPASSWD:ALL'  # pragma: allowlist secret
+        owner: root
+        group: root
+        mode: 'u=rw,g=rw'
+        validate: /usr/sbin/visudo -csf %s
