@@ -24,7 +24,7 @@
         owner: "{{ minecraft_user_registered.name }}"
         group: "{{ minecraft_user_registered.name }}"
         state: directory
-        mode: 'u=rwx,g=r,o='
+        mode: 'u=rwx,g=rx,o='
     - name: Create and start the Minecraft server container
       become: true
       community.docker.docker_container:
@@ -35,7 +35,23 @@
           - "25565:25565"
         env:
           EULA: "TRUE"
+          MOTD: "Marble's Minecraft Server\nFXNT Create Modpack\nask on Marble Discord for access"
           UID: "{{ minecraft_user_registered.uid }}"
           GID: "{{ minecraft_user_registered.group }}"
+          VERSION: "1.20.1"
+          MEMORY: "6G"
+          MAX_PLAYERS: "8"
+          SNOOPER_ENABLED: "false"
+          VIEW_DISTANCE: "16"
+          ALLOW_FLIGHT: "true"
+          ENABLE_WHITELIST: "true"
+          OVERRIDE_WHITELIST: "true"
+          WHITELIST: "jdmarble,LargeGeneric,nmarb,Jenivieve,fauxnoodel,EggWizardtv,DiamondStarPuppy,Al3xRamble"
+          TYPE: "AUTO_CURSEFORGE"
+          CF_API_KEY: ""
+          CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/fxnt-create/download/5234886
+          CF_EXCLUDE_MODS: "266734"
+          CF_OVERRIDES_EXCLUSIONS: mods/freecam*.jar
         volumes:
-          - /home/user/data:/data
+          - "{{ minecraft_user_registered.home }}/data:/data"
+          - "{{ minecraft_user_registered.home }}/downloads:/downloads"
